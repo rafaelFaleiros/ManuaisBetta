@@ -5,7 +5,7 @@
   <title>Central de Arquivos Betta</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    /* Estilos Gerais */
+    /* Estilos mantidos iguais */
     body {
       font-family: Arial, sans-serif;
       background-color: #04394E;
@@ -39,7 +39,6 @@
       box-sizing: border-box;
       text-align: center;
     }
-    /* Breadcrumbs */
     .breadcrumbs {
       margin: 1rem 0;
       font-size: 0.9rem;
@@ -53,7 +52,6 @@
     .breadcrumbs span {
       margin: 0 0.5rem;
     }
-    /* Pesquisa */
     #searchContainer {
       margin-bottom: 1rem;
     }
@@ -65,7 +63,6 @@
       border-radius: 4px;
       font-size: 1rem;
     }
-    /* Grid de Botões */
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -94,7 +91,6 @@
       font-size: 2rem;
       margin-bottom: 0.5rem;
     }
-    /* Botão Voltar */
     .back-button {
       margin-bottom: 1rem;
       display: inline-block;
@@ -107,105 +103,20 @@
   </style>
 </head>
 <body>
-  <!-- Cabeçalho com Logo e Título -->
   <header>
     <img src="logo.png" alt="Logo da Empresa" />
-
   </header>
 
   <main>
-    <!-- Breadcrumb de navegação -->
     <div class="breadcrumbs" id="breadcrumbs"></div>
-    <!-- Botão Voltar -->
     <div class="back-button" id="backButton" style="display: none;" onclick="navegarPara(currentPath.length - 2)">⬅️ Voltar</div>
-    <!-- Campo de Pesquisa -->
     <div id="searchContainer">
       <input type="text" id="searchInput" placeholder="Pesquisar manual pelo número de série ou nome" />
     </div>
-    <!-- Grid de Itens -->
     <div class="grid" id="itemsGrid"></div>
   </main>
 
-  <script>
-    // Chave da API e Pasta raiz (a pasta do Google Drive com os arquivos)
-    const API_KEY = 'AIzaSyCKCnPihw699cL58JRGEJHY-FVxlQl_pJM';
-    const ROOT_FOLDER_ID = '14NIfQsCoFIqoRxAv3CyfYKJRy1mf_TrQ';
-
-    let currentPath = [{ id: ROOT_FOLDER_ID, name: 'Central de Arquivos' }];
-    let currentFilesData = []; // Armazena os itens atuais para pesquisa
-
-    // Função para listar itens (pastas/arquivos) de uma determinada pasta
-    async function listarItens(folderId) {
-      const url = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents&key=${API_KEY}&fields=files(id,name,mimeType)`;
-      const res = await fetch(url);
-      const data = await res.json();
-      currentFilesData = data.files;
-      renderItens(currentFilesData);
-      atualizarBreadcrumbs();
-      // Exibe o botão voltar somente se não estivermos na raiz
-      document.getElementById('backButton').style.display = currentPath.length > 1 ? 'inline-block' : 'none';
-    }
-
-    // Renderiza os itens como botões na grid, filtrando se houver pesquisa
-    function renderItens(itens) {
-      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-      const grid = document.getElementById('itemsGrid');
-      grid.innerHTML = '';
-
-      itens
-        .filter(item => item.name.toLowerCase().includes(searchTerm))
-        .forEach(item => {
-          const btn = document.createElement('button');
-          btn.className = 'btn-item';
-
-          if (item.mimeType === 'application/vnd.google-apps.folder') {
-            // Se for pasta, ícone de pasta e clique navega para a pasta
-            btn.innerHTML = `<span class="icon">📁</span>${item.name}`;
-            btn.onclick = () => openItem(item.id, item.name, true);
-          } else {
-            // Se for arquivo, ícone de arquivo e clique faz download
-            btn.innerHTML = `<span class="icon">📄</span>${item.name}`;
-            btn.onclick = () => {
-              window.open(`https://drive.google.com/uc?export=download&id=${item.id}`, '_blank');
-            };
-          }
-          grid.appendChild(btn);
-        });
-    }
-
-    // Atualiza o breadcrumb de navegação
-    function atualizarBreadcrumbs() {
-      const container = document.getElementById('breadcrumbs');
-      container.innerHTML = '';
-      currentPath.forEach((item, index) => {
-        if (index > 0) container.innerHTML += '<span>/</span>';
-        container.innerHTML += `<a href="#" onclick="navegarPara(${index})">${item.name}</a>`;
-      });
-    }
-
-    // Função para abrir item: se for pasta, navega para ela
-    function openItem(id, name, isFolder) {
-      if (isFolder) {
-        currentPath.push({ id, name });
-        listarItens(id);
-        document.getElementById('searchInput').value = '';
-      }
-    }
-
-    // Navega para um nível específico no breadcrumb
-    function navegarPara(index) {
-      currentPath = currentPath.slice(0, index + 1);
-      listarItens(currentPath[index].id);
-      document.getElementById('searchInput').value = '';
-    }
-
-    // Filtra os itens enquanto o usuário digita
-    document.getElementById('searchInput').addEventListener('input', function() {
-      renderItens(currentFilesData);
-    });
-
-    // Inicia na pasta raiz
-    listarItens(ROOT_FOLDER_ID);
-  </script>
+  <!-- Script separado para manter segurança e estrutura -->
+  <script type="module" src="main.js"></script>
 </body>
 </html>
