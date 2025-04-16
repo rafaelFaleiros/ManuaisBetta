@@ -1,6 +1,6 @@
-// Variáveis de ambiente (via Vite ou bundler compatível)
-const API_KEY = import.meta.env.VITE_API_KEY;
-const ROOT_FOLDER_ID = import.meta.env.VITE_ROOT_FOLDER_ID;
+// Substitua pelos seus dados diretamente aqui:
+const API_KEY = 'SUA_API_KEY_AQUI';
+const ROOT_FOLDER_ID = 'SEU_FOLDER_ID_AQUI';
 
 let currentPath = [{ id: ROOT_FOLDER_ID, name: 'Central de Arquivos' }];
 let currentFilesData = [];
