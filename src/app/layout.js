@@ -1,6 +1,22 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
+// app/layout.js
+import Link from 'next/link';
+export default function RootLayout({ children }) {
+  return (
+    <html lang="pt-BR">
+      <body>
+        <header>
+          <Link href="/">Catálogos</Link>
+          <Link href="/manuais">Manuais</Link>
+        </header>
+        {children}
+      </body>
+    </html>
+  );
+}
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
