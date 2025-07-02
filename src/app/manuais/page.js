@@ -1,5 +1,6 @@
-// app/manuais/page.js
-import Home from '../page.js'  // assume que seu Home vem de app/page.js
+'use client';
+import Home from '../home';
+
 export default function ManuaisPage() {
-  return <Home isManuais={true} />
+  return <Home isManuais={true} />;
 }

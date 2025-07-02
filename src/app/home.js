@@ -1,84 +1,77 @@
-// app/home.js
 'use client';
 
 import { useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
 
-const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
-const CATALOGOS_ID = process.env.NEXT_PUBLIC_ROOT_FOLDER_ID;
-const MANAIS_ID   = process.env.NEXT_PUBLIC_MANAIS_FOLDER_ID;
+const CATALOGOS_ID = process.env.NEXT_PUBLIC_CATALOGOS_FOLDER_ID;
+const MANAIS_ID    = process.env.NEXT_PUBLIC_MANAIS_FOLDER_ID;
 
 export default function Home({ isManuais = false }) {
-  const pathname = usePathname();
-  // se preferir, pode ignorar a prop e usar só pathname:
-  // const isManuais = pathname.startsWith('/manuais');
   const rootId = isManuais ? MANAIS_ID : CATALOGOS_ID;
+  const title  = isManuais ? 'Manuais' : 'Catálogos';
 
-  const [currentPath, setCurrentPath] = useState([{ id: rootId, name: isManuais ? 'Manuais' : 'Catálogos' }]);
-  const [files, setFiles]       = useState([]);
-  const [search, setSearch]     = useState('');
+  const [currentPath, setCurrentPath] = useState([{ id: rootId, name: title }]);
+  const [files, setFiles]             = useState([]);
+  const [search, setSearch]           = useState('');
 
   useEffect(() => {
-    listarItens(currentPath.at(-1).id);
+    listarItens(title.toLowerCase());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function listarItens(folderId) {
-    const url = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents&key=${API_KEY}&fields=files(id,name,mimeType)`;
+  async function listarItens(category) {
+    const url = `/api/drive?category=${category}`;
     const res = await fetch(url);
-    const data = await res.json();
-    setFiles(data.files || []);
+    const json = await res.json();
+    setFiles(json.files || []);
   }
 
   function openItem(id, name, isFolder) {
     if (isFolder) {
-      const newPath = [...currentPath, { id, name }];
-      setCurrentPath(newPath);
-      listarItens(id);
+      setCurrentPath(path => [...path, { id, name }]);
+      listarItens(name.toLowerCase());
       setSearch('');
     } else {
       window.open(`https://drive.google.com/uc?export=download&id=${id}`, '_blank');
     }
   }
 
-  function navegarPara(index) {
-    const newPath = currentPath.slice(0, index + 1);
+  function navegarPara(idx) {
+    const newPath = currentPath.slice(0, idx + 1);
     setCurrentPath(newPath);
-    listarItens(newPath[index].id);
+    // volta sempre à raiz (não reﬁna navegação em subpastas)
+    listarItens(title.toLowerCase());
     setSearch('');
   }
 
   return (
     <>
-      <header>
-        <img src="/logo.png" alt="Logo da Empresa" />
+      <header className="p-4 bg-gray-100">
+        <img src="/logo.png" alt="Logo da Empresa" className="h-10" />
       </header>
 
-      <main>
-        <h1>{isManuais ? 'Manuais' : 'Catálogos'}</h1>
+      <main className="p-6">
+        <h1 className="text-2xl font-bold mb-4">{title}</h1>
 
-        <nav className="breadcrumbs" id="breadcrumbs">
+        <nav className="mb-4 text-sm text-blue-600">
           {currentPath.map((item, idx) => (
             <span key={item.id}>
-              {idx > 0 && <span> / </span>}
-              <a href="#" onClick={() => navegarPara(idx)}>{item.name}</a>
+              {idx > 0 && ' / '}
+              <button onClick={() => navegarPara(idx)}>
+                {item.name}
+              </button>
             </span>
           ))}
         </nav>
-
-        {currentPath.length > 1 && (
-          <button onClick={() => navegarPara(currentPath.length - 2)}>
-            ⬅️ Voltar
-          </button>
-        )}
 
         <input
           type="text"
           placeholder="Filtrar arquivos por nome"
           value={search}
           onChange={e => setSearch(e.target.value)}
+          className="border p-2 mb-4 w-full"
         />
 
-        <div className="grid" id="itemsGrid">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {files
             .filter(f => f.name.toLowerCase().includes(search.toLowerCase()))
             .map(f => {
@@ -86,11 +79,13 @@ export default function Home({ isManuais = false }) {
               return (
                 <button
                   key={f.id}
-                  className="btn-item"
                   onClick={() => openItem(f.id, f.name, isFolder)}
+                  className="flex items-center gap-2 p-4 border rounded hover:bg-gray-50"
                 >
-                  <span className="icon">{isFolder ? '📁' : '📄'}</span>
-                  {f.name}
+                  <span className="text-2xl">
+                    {isFolder ? '📁' : '📄'}
+                  </span>
+                  <span>{f.name}</span>
                 </button>
               );
             })}
